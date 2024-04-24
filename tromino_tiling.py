@@ -4,12 +4,10 @@ def tromino_tiling(n, board=None, top=0, left=0, size=None, hole=None):
 
     if board is None:
         board = [[' ' for _ in range(size)] for _ in range(size)]
-        # Προσθήκη της τρύπας
         if hole is None:
             hole = (0, 0)
         board[hole[0]][hole[1]] = 'X'
 
-    # Βασική περίπτωση για n=1
     if n == 1:
         for i in range(2):
             for j in range(2):
@@ -17,14 +15,9 @@ def tromino_tiling(n, board=None, top=0, left=0, size=None, hole=None):
                     board[top + i][left + j] = 'G'
         return board
 
-    # Επέκταση για n = 2
     elif n == 2:
-        # Προσωρινή σκληροκοδικοποίηση της τρύπας και των τρομίνων
-        tile = 'G'
-        board[top + 1][left + 1] = tile  # Κεντρικό τρόμινο
-        # Τοποθετούμε τα υπόλοιπα τρόμινο γύρω από την τρύπα
         directions = [(0, 0), (0, 1), (1, 0), (1, 1)]
-        colors = ['R', 'B', 'B', 'R']  # Διάφορα χρώματα για απεικόνιση
+        colors = ['R', 'B', 'B', 'R']
         index = 0
         for dy, dx in directions:
             if (top + dy, left + dx) != hole:
@@ -32,7 +25,22 @@ def tromino_tiling(n, board=None, top=0, left=0, size=None, hole=None):
             index += 1
         return board
 
-    # Περαιτέρω επέκταση για n > 2 θα γίνει εδώ
+    else:
+        sub_size = size // 2
+        # Βρίσκουμε τη θέση για την τρύπα στο κέντρο του μεγαλύτερου τετραγώνου
+        middle = (top + sub_size - 1, left + sub_size - 1)
+        # Θέτουμε τρόμινο στο κέντρο που καλύπτει τρία από τα τέσσερα κεντρικά τετράγωνα
+        for dy, dx in [(0, 0), (0, 1), (1, 0)]:
+            board[middle[0] + dy][middle[1] + dx] = 'G'
+        # Αναδρομική κλήση για κάθε τεταρτημόριο
+        # Εξαίρεση: μεταφέρουμε την τρύπα στο κατάλληλο τεταρτημόριο
+        for i in range(2):
+            for j in range(2):
+                new_top = top + i * sub_size
+                new_left = left + j * sub_size
+                new_hole = (middle[0] + i, middle[1] + j) if board[middle[0] + i][middle[1] + j] == 'G' else hole
+                tromino_tiling(n-1, board, new_top, new_left, sub_size, new_hole)
+        return board
 
 def print_board(board):
     for row in board:
